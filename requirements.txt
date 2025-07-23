@@ -3,3 +3,7 @@ langchain_community
 bs4==0.0.2
 tqdm
 html2text==2024.2.26
+lxml==5.3.1
+langchain-huggingface
+sentence-transformers
+faiss-cpu==1.10.0

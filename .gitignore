@@ -120,3 +120,4 @@ dmypy.json
 # IntelliJ
 .idea/
 *.iml
+/indexes/
