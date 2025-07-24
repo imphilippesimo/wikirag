@@ -1,5 +1,6 @@
 langchain==0.3.19
 langchain_community
+langchain_ollama
 bs4==0.0.2
 tqdm
 html2text==2024.2.26

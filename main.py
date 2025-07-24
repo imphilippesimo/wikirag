@@ -1,6 +1,7 @@
 import faiss
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.document_loaders import AsyncHtmlLoader
+from langchain_ollama.chat_models import ChatOllama
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import HTMLSectionSplitter, RecursiveCharacterTextSplitter
@@ -65,9 +66,50 @@ saved_vectorstore = FAISS.load_local(
     allow_dangerous_deserialization=True
 )
 
+# Original question
 query = "Who won the 2023 World Cup final match?"
 
-docs = saved_vectorstore.similarity_search(query, k=2)
+# Ranking the chunks in descending order of similarity
+retrieved_docs = saved_vectorstore.similarity_search(query, k=2)
 
-for i, doc in enumerate(docs):
-    print(f"Page {i + 1}:\n{doc.page_content}\n{'-' * 40}")
+# for i, doc in enumerate(retrieved_docs):
+#     print(f"Page {i + 1}:\n{doc.page_content}\n{'-' * 40}")
+
+# Selecting the first chunk as the retrieved information
+retrieved_context=retrieved_docs[0].page_content
+
+# Creating the prompt
+augmented_prompt=f"""
+
+Given the context below, answer the question.
+
+Question: {query}
+
+Context: {retrieved_context}
+
+Remember to answer only based on the context provided and not from any other sources.
+
+If the question cannot be answered based on the provided context, say I don't know.
+
+"""
+
+# Send the prompt to the LLM
+print("--- Sending prompt to local LLM ---")
+print(augmented_prompt)
+
+llm = ChatOllama(
+    model="mistral",
+    temperature=0,
+    num_predict=None
+)
+
+messages = [
+    ("human", augmented_prompt),
+]
+
+response = llm.invoke(messages)
+
+answer = response.content
+
+print("\n--- LLM Response ---")
+print(answer)
